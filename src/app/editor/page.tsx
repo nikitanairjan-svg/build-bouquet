@@ -49,18 +49,20 @@ export default function EditorPage() {
             min-height: 0;
           }
           .editor-sidepanel {
-            flex: 0 0 clamp(180px, 30vh, 230px);
-            min-height: 0;
+            position: static;
+            height: auto;
+            width: 100%;
+            border-left: none;
           }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 430px) {
           .editor-workspace {
             justify-content: center;
             overflow: visible;
-            padding: 8px 8px 6px;
+            padding: 8px 8px 6px 8px;
           }
           .editor-canvas-stack {
-            transform: scale(0.72);
+            transform: scale(0.68);
             transform-origin: center center;
           }
           .editor-header .editor-back-label {
@@ -72,12 +74,11 @@ export default function EditorPage() {
           }
         }
         @media (max-width: 420px) {
-          .editor-canvas-stack { transform: scale(0.66); }
-          .editor-sidepanel { flex-basis: clamp(168px, 28vh, 210px); }
+          .editor-canvas-stack { transform: scale(0.68); }
         }
         @media (max-width: 360px) {
           .editor-canvas-stack { transform: scale(0.62); }
-          .editor-sidepanel { flex-basis: clamp(160px, 26vh, 196px); }
+        }
         }
         @media (max-height: 780px) and (max-width: 640px) {
           .editor-canvas-stack { transform: scale(0.64); }

@@ -42,6 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${cormorant.variable} ${jost.variable} ${petitFormal.variable}`}
+      suppressHydrationWarning
     >
       <body className="antialiased" style={{ backgroundColor: "var(--paper)" }}>
         <Preloader />

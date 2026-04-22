@@ -14,7 +14,7 @@ export const CANVAS_H = 520;
 const WRAP_W      = 340;
 const WRAP_H      = 460;
 const FLOWER_SIZE = 88;
-const HANDLE_SIZE = 10;
+const HANDLE_SIZE = 16;
 const ROTATE_OFFSET = 28; // center of rotation handle above flower top; keeps 15px stem line with 8px box pad
 
 function clamp(v: number, lo: number, hi: number) {
@@ -281,6 +281,7 @@ function PlacedFlower({
           }} />
           {/* Rotation handle — hover: scale + darken */}
           <div
+            className="canvas-handle"
             title="Drag to rotate"
             onMouseEnter={() => setRotHov(true)}
             onMouseLeave={() => setRotHov(false)}
@@ -301,10 +302,10 @@ function PlacedFlower({
             onPointerDown={startRotate}
           />
           {/* Corner resize handles */}
-          <div style={hdl({ top: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2, cursor: "nw-resize" })} onPointerDown={startResize} />
-          <div style={hdl({ top: -HANDLE_SIZE / 2, left: FLOWER_SIZE - HANDLE_SIZE / 2, cursor: "ne-resize" })} onPointerDown={startResize} />
-          <div style={hdl({ top: FLOWER_SIZE - HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2, cursor: "sw-resize" })} onPointerDown={startResize} />
-          <div style={hdl({ top: FLOWER_SIZE - HANDLE_SIZE / 2, left: FLOWER_SIZE - HANDLE_SIZE / 2, cursor: "se-resize" })} onPointerDown={startResize} />
+          <div className="canvas-handle" style={hdl({ top: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2, cursor: "nw-resize" })} onPointerDown={startResize} />
+          <div className="canvas-handle" style={hdl({ top: -HANDLE_SIZE / 2, left: FLOWER_SIZE - HANDLE_SIZE / 2, cursor: "ne-resize" })} onPointerDown={startResize} />
+          <div className="canvas-handle" style={hdl({ top: FLOWER_SIZE - HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2, cursor: "sw-resize" })} onPointerDown={startResize} />
+          <div className="canvas-handle" style={hdl({ top: FLOWER_SIZE - HANDLE_SIZE / 2, left: FLOWER_SIZE - HANDLE_SIZE / 2, cursor: "se-resize" })} onPointerDown={startResize} />
         </>
       )}
     </motion.div>
@@ -404,7 +405,7 @@ export default function Canvas() {
           are dragged beyond the 420×520 boundary. */}
       <div
         ref={canvasRef}
-        className="absolute inset-0 overflow-hidden"
+        className="absolute inset-0 overflow-hidden" style={{ touchAction: "none" }}
         // onPointerDown — not onClick — for deselect.
         // Reason: using onClick caused a race: mouseup → selectFlower, then
         // the subsequent click event bubbled from the flower img up to here

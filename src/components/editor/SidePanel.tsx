@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useBouquetStore } from "@/store/bouquetStore";
 import { WRAPS, WRAP_COLORS, getWrapImagePath } from "@/lib/wraps";
 import FlowerPicker from "./FlowerPicker";
@@ -184,27 +184,197 @@ function BouquetTab() {
 export default function SidePanel() {
   const [activeTab, setActiveTab] = useState<TabId>("bouquet");
   const [hoveredTab, setHoveredTab] = useState<TabId | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const startYRef = useRef(0);
+  const panelRef = useRef<HTMLDivElement>(null);
 
+  // Detect if mobile
+  const [isMobile, setIsMobile] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+    const checkMobile = () => setIsMobile(window.innerWidth <= 960);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleDragStart = (e: React.PointerEvent) => {
+    if (!isMobile) return;
+    setIsDragging(true);
+    startYRef.current = e.clientY;
+  };
+
+  const handleDragMove = (e: React.PointerEvent) => {
+    if (!isDragging || !isMobile) return;
+    e.preventDefault();
+    const dy = e.clientY - startYRef.current;
+    // Smooth dragging with no limits during drag, limits applied on end
+    setDragOffset(dy);
+  };
+
+  const handleDragEnd = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const threshold = 50; // pixels to trigger toggle
+    const velocity = Math.abs(dragOffset) > threshold;
+    
+    if (velocity) {
+      if (dragOffset < 0 && !isExpanded) {
+        // Dragged up when collapsed - expand
+        setIsExpanded(true);
+      } else if (dragOffset > 0 && isExpanded) {
+        // Dragged down when expanded - collapse
+        setIsExpanded(false);
+      }
+    }
+    
+    // Smooth return to position
+    setDragOffset(0);
+  };
+
+  // Handle outside click to collapse
+  useEffect(() => {
+    if (!isMobile || !isExpanded) return;
+
+    const handleOutsideClick = (e: Event) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [isMobile, isExpanded]);
+
+  // Desktop layout
+  if (!hydrated || !isMobile) {
+    return (
+      <aside style={{
+        flex: 1, width: "100%", height: "100%",
+        display: "flex", flexDirection: "column",
+        backgroundColor: "#F0EAE0",
+        borderLeft: "1px solid #D8D0C4",
+      }}>
+        <style>{`
+          @media (max-width: 640px) {
+            .sidepanel-tabs button {
+              padding: 10px 0 9px !important;
+              font-size: 13px !important;
+            }
+          }
+        `}</style>
+
+        <div className="sidepanel-tabs" style={{
+          display: "flex",
+          gap: 0,
+          borderBottom: "1px solid #D8D0C4",
+          flexShrink: 0,
+        }}>
+          {TABS.map((tab) => {
+            const active = tab.id === activeTab;
+            const hov    = hoveredTab === tab.id && !active;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                onMouseEnter={() => setHoveredTab(tab.id)}
+                onMouseLeave={() => setHoveredTab(null)}
+                style={{
+                  flex: 1,
+                  background: "none", border: "none", cursor: "pointer",
+                  padding: "14px 0 12px",
+                  fontFamily: "var(--font-cormorant)",
+                  fontSize: 15, letterSpacing: "0.5px",
+                  textAlign: "center",
+                  color: active ? "#3D2B1F" : hov ? "#6B5E53" : "#A89E93",
+                  borderBottom: active ? "2px solid #963310" : "2px solid transparent",
+                  marginBottom: "-1px",
+                  transition: "color 180ms, border-color 180ms",
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="sidepanel-content" style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          scrollbarWidth: "thin",
+          scrollbarColor: "#D8D0C4 transparent",
+        }}>
+          {activeTab === "bouquet" && <BouquetTab />}
+          {activeTab === "blooms"  && <FlowerPicker />}
+        </div>
+      </aside>
+    );
+  }
+
+  // Mobile bottom sheet layout
   return (
-    <aside style={{
-      flex: 1, width: "100%", height: "100%",
-      display: "flex", flexDirection: "column",
-      backgroundColor: "#F0EAE0",
-      borderLeft: "1px solid #D8D0C4",
-    }}>
-      <style>{`
-        @media (max-width: 640px) {
-          .sidepanel-tabs button {
-            padding: 10px 0 9px !important;
-            font-size: 13px !important;
-          }
-          .sidepanel-content {
-            // overflow-y: hidden !important;
-          }
-        }
-      `}</style>
+    <div
+      ref={panelRef}
+      style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        maxHeight: isExpanded ? "90vh" : "clamp(180px, 30vh, 230px)",
+        backgroundColor: "#F0EAE0",
+        borderTop: "1px solid #D8D0C4",
+        display: "flex",
+        flexDirection: "column",
+        transition: !isDragging ? "max-height 300ms ease" : "none",
+        transform: `translateY(${dragOffset}px)`,
+        boxShadow: "0 -2px 8px rgba(0, 0, 0, 0.1)",
+      }}
+      onPointerMove={handleDragMove}
+      onPointerUp={handleDragEnd}
+      onPointerLeave={handleDragEnd}
+    >
+      {/* Drag handle - mobile notification bar style */}
+      <div
+        onPointerDown={handleDragStart}
+        style={{
+          height: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "grab",
+          flexShrink: 0,
+          userSelect: "none",
+          touchAction: "none",
+          padding: "8px 0",
+          transition: "transform 150ms",
+          transform: isDragging ? "scale(1.05)" : "scale(1)",
+        }}
+      >
+        <div
+          style={{
+            width: 60,
+            height: 4,
+            borderRadius: 2,
+            backgroundColor: isDragging ? "rgba(139, 37, 0, 0.5)" : "rgba(139, 37, 0, 0.3)",
+            transition: "background-color 150ms, transform 150ms, box-shadow 150ms",
+            transform: isDragging ? "scaleY(1.2)" : "scaleY(1)",
+            boxShadow: isDragging ? "0 2px 8px rgba(139, 37, 0, 0.3)" : "none",
+          }}
+        />
+      </div>
 
-      {/* ── Underline tabs ── */}
+      {/* Tabs */}
       <div className="sidepanel-tabs" style={{
         display: "flex",
         gap: 0,
@@ -223,9 +393,9 @@ export default function SidePanel() {
               style={{
                 flex: 1,
                 background: "none", border: "none", cursor: "pointer",
-                padding: "14px 0 12px",
+                padding: "10px 0 9px",
                 fontFamily: "var(--font-cormorant)",
-                fontSize: 15, letterSpacing: "0.5px",
+                fontSize: 13, letterSpacing: "0.5px",
                 textAlign: "center",
                 color: active ? "#3D2B1F" : hov ? "#6B5E53" : "#A89E93",
                 borderBottom: active ? "2px solid #963310" : "2px solid transparent",
@@ -239,7 +409,7 @@ export default function SidePanel() {
         })}
       </div>
 
-      {/* ── Tab content ── */}
+      {/* Content */}
       <div className="sidepanel-content" style={{
         flex: 1,
         overflowY: "auto",
@@ -250,6 +420,6 @@ export default function SidePanel() {
         {activeTab === "bouquet" && <BouquetTab />}
         {activeTab === "blooms"  && <FlowerPicker />}
       </div>
-    </aside>
+    </div>
   );
 }

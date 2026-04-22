@@ -26,13 +26,13 @@ export default function NoteEditor() {
     if (note?.color) setColor(note.color);
   }, [note]);
 
-  const hasSavedHistory = { current: false };
+  const [hasSavedHistory, setHasSavedHistory] = useState(false);
 
   const handleFocus = () => {
     // Save one history snapshot before this editing session begins
-    if (!hasSavedHistory.current) {
+    if (!hasSavedHistory) {
       saveHistory();
-      hasSavedHistory.current = true;
+      setHasSavedHistory(true);
     }
   };
 
