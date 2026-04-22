@@ -1,0 +1,158 @@
+import Canvas from "@/components/editor/Canvas";
+import CanvasControls from "@/components/editor/CanvasControls";
+import CanvasHint from "@/components/editor/CanvasHint";
+import PreviewButton from "@/components/editor/PreviewButton";
+import EditorBackButton from "@/components/editor/EditorBackButton";
+import SidePanel from "@/components/editor/SidePanel";
+
+export const metadata = { title: "Create Bouquet" };
+
+export default function EditorPage() {
+  return (
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", backgroundColor: "var(--paper)", overflow: "hidden", position: "relative" }}>
+      <style>{`
+        .editor-main {
+          display: flex;
+          flex: 1;
+          overflow: hidden;
+          position: relative;
+          z-index: 1;
+        }
+        .editor-workspace {
+          flex: 0 0 80%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          background-color: var(--lnd-bg);
+          background-image: linear-gradient(rgba(61,43,31,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(61,43,31,0.06) 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+        .editor-sidepanel {
+          flex: 0 0 20%;
+          overflow: hidden;
+          display: flex;
+        }
+        @media (max-width: 1200px) {
+          .editor-workspace { flex-basis: 74%; }
+          .editor-sidepanel { flex-basis: 26%; }
+        }
+        @media (max-width: 960px) {
+          .editor-header { padding: 0 14px !important; }
+          .editor-main {
+            flex-direction: column;
+            height: calc(100dvh - 56px);
+          }
+          .editor-workspace {
+            flex: 1;
+            min-height: 0;
+          }
+          .editor-sidepanel {
+            flex: 0 0 clamp(180px, 30vh, 230px);
+            min-height: 0;
+          }
+        }
+        @media (max-width: 640px) {
+          .editor-workspace {
+            justify-content: center;
+            overflow: visible;
+            padding: 8px 8px 6px;
+          }
+          .editor-canvas-stack {
+            transform: scale(0.72);
+            transform-origin: center center;
+          }
+          .editor-header .editor-back-label {
+            display: none;
+          }
+          .editor-header .editor-preview-btn {
+            padding: 6px 12px !important;
+            font-size: 13px !important;
+          }
+        }
+        @media (max-width: 420px) {
+          .editor-canvas-stack { transform: scale(0.66); }
+          .editor-sidepanel { flex-basis: clamp(168px, 28vh, 210px); }
+        }
+        @media (max-width: 360px) {
+          .editor-canvas-stack { transform: scale(0.62); }
+          .editor-sidepanel { flex-basis: clamp(160px, 26vh, 196px); }
+        }
+        @media (max-height: 780px) and (max-width: 640px) {
+          .editor-canvas-stack { transform: scale(0.64); }
+        }
+        @media (max-height: 720px) and (max-width: 640px) {
+          .editor-canvas-stack { transform: scale(0.58); }
+          .editor-sidepanel { flex-basis: clamp(146px, 24vh, 180px); }
+        }
+      `}</style>
+
+      {/* ── Botanical watermark decorations (behind everything) ── */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/assets/backgrounds/watermark-hero.png"
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute", right: "18%", top: "50%",
+          transform: "translateY(-50%)",
+          width: 520, height: "auto",
+          opacity: 0.07,
+          mixBlendMode: "multiply",
+          pointerEvents: "none", userSelect: "none", zIndex: 0,
+        }}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/assets/backgrounds/watermark-footer.png"
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "absolute", left: -40, bottom: -40,
+          width: 380, height: "auto",
+          opacity: 0.07,
+          mixBlendMode: "multiply",
+          pointerEvents: "none", userSelect: "none", zIndex: 0,
+        }}
+      />
+
+      {/* ── Header ── */}
+      <header className="editor-header" style={{
+        flexShrink: 0,
+        height: 56,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 24px",
+        backgroundColor: "var(--paper)",
+        borderBottom: "0.5px solid #D8D0C4",
+        position: "relative", zIndex: 10,
+      }}>
+        <EditorBackButton />
+
+        <PreviewButton />
+      </header>
+
+      {/* ── Main area ── */}
+      <div className="editor-main">
+
+        {/* Canvas workspace — 80%, grid, canvas + toolbar centered together */}
+        <div className="editor-workspace">
+          <CanvasHint />
+          {/* Canvas + toolbar as one centered unit */}
+          <div className="editor-canvas-stack" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Canvas />
+            <div style={{ height: 14 }} />
+            <CanvasControls />
+          </div>
+        </div>
+
+        {/* Side panel — 20% */}
+        <div className="editor-sidepanel">
+          <SidePanel />
+        </div>
+      </div>
+    </div>
+  );
+}

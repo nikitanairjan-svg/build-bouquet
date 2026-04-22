@@ -1,26 +1,256 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens ──────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper:             #EDE4D6;
+  --ink:               #2C1F14;
+  --rust:              #8B3A1C;
+  --brown-dark:        #3D2010;
+
+  --font-cormorant:    'Cormorant Garamond', Georgia, serif;
+  --font-jost:         'Jost', system-ui, sans-serif;
+  --font-petit-formal: 'Petit Formal Script', cursive;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base ───────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-jost);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+::selection {
+  background-color: rgba(139,58,28,0.15);
+  color: var(--ink);
+}
+
+/* ─── Paper texture ──────────────────────────────────────────── */
+.paper-texture {
+  position: relative;
+}
+
+/* Grain overlay is handled as an inline SVG element in page.tsx
+   (SVG feTurbulence filters are sandboxed in CSS data URIs in most browsers) */
+
+/* ─── Landing Design Tokens ─────────────────────────────────── */
+:root {
+  --lnd-bg:       #F0E8D6;
+  --lnd-brown:    #3D2817;
+  --lnd-rust:     #8B3A1C;
+  --lnd-sage:     #6A9850;
+  --lnd-rose:     #E8A0A8;
+  --lnd-lavender: #C8B0E8;
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes lnd-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Hero entrance ──────────────────────────────────────────── */
+@keyframes lineDrawIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes heroFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Hero ambient ───────────────────────────────────────────── */
+@keyframes inkShimmer {
+  0%   { color: #3D2817; }
+  50%  { color: #6B3A2A; }
+  100% { color: #3D2817; }
+}
+@keyframes lineBreathe {
+  0%   { transform: scaleX(1); }
+  50%  { transform: scaleX(1.06); }
+  100% { transform: scaleX(1); }
+}
+
+/* ─── Hero animation classes ─────────────────────────────────── */
+.hero-logo {
+  animation: heroFadeIn 500ms ease-out 200ms both;
+}
+.hero-headline {
+  animation: heroFadeUp 600ms ease-out 500ms both;
+}
+.hero-subtitle {
+  animation: heroFadeUp 500ms ease-out 800ms both;
+}
+.hero-shimmer {
+  animation: inkShimmer 10s ease-in-out 1800ms infinite;
+}
+
+/* ─── Reduced motion — show everything static immediately ────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo,
+  .hero-headline,
+  .hero-subtitle {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .hero-shimmer {
+    animation: none !important;
+  }
+}
+
+/* ─── Petal drift — three variants so petals never sync ─────── */
+@keyframes petalDrift1 {
+  0%   { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+  33%  { transform: rotate(calc(var(--base-rotation) + 8deg)) translate(6px,  -4px); }
+  66%  { transform: rotate(calc(var(--base-rotation) - 5deg)) translate(-4px,  5px); }
+  100% { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+}
+@keyframes petalDrift2 {
+  0%   { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+  33%  { transform: rotate(calc(var(--base-rotation) - 7deg)) translate(-5px,  4px); }
+  66%  { transform: rotate(calc(var(--base-rotation) + 6deg)) translate(4px,  -5px); }
+  100% { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+}
+@keyframes petalDrift3 {
+  0%   { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+  40%  { transform: rotate(calc(var(--base-rotation) + 9deg)) translate(3px,   6px); }
+  70%  { transform: rotate(calc(var(--base-rotation) - 4deg)) translate(-5px, -3px); }
+  100% { transform: rotate(var(--base-rotation)) translate(0px,   0px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal-svg { animation: none !important; }
+}
+
+/* ─── Landing layout ─────────────────────────────────────────── */
+.lnd-above-fold {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-inline: clamp(16px, 5vw, 80px);
+  padding-block: 0 clamp(16px, 2vh, 28px);
+}
+
+/* ─── Cards grid — centered, fixed-width specimen cards ─────── */
+.lnd-cards-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+/* ─── Card base — vintage specimen card ─────────────────────── */
+.lnd-card {
+  position: relative;
+  width: 300px;
+  flex-shrink: 0;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  border: 1px solid #D8D0C4;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  background-color: #EDE5D5;
+  transition: opacity      500ms ease-out,
+              transform    350ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow   350ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.lnd-card:focus-visible {
+  outline: 2px solid #8B3A1C;
+  outline-offset: 3px;
+}
+
+/* ─── Cards responsive ───────────────────────────────────────── */
+@media (max-width: 960px) {
+  .lnd-cards-grid { gap: 24px; }
+  .lnd-card       { width: 280px; }
+}
+
+@media (max-width: 768px) {
+  .lnd-cards-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .lnd-card { width: min(300px, 80vw); }
+}
+
+/* ─── Start creating link ────────────────────────────────────── */
+.lnd-start-link {
+  transition: opacity 200ms ease;
+  text-underline-offset: 3px;
+}
+.lnd-start-link:hover {
+  text-decoration: underline;
+  opacity: 0.75;
+}
+.lnd-start-link:focus-visible {
+  outline: 2px solid #8B3A1C;
+  outline-offset: 3px;
+}
+
+/* ─── Footer link ────────────────────────────────────────────── */
+.lnd-footer-link {
+  transition: opacity 200ms ease;
+}
+.lnd-footer-link:hover {
+  opacity: 0.55;
+}
+.lnd-footer-link:focus-visible {
+  outline: 2px solid #8B3A1C;
+  outline-offset: 2px;
+}
+
+/* ─── Footer responsive ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+}
+
+/* ─── Scattered petals — responsive visibility ───────────────── */
+@media (max-width: 768px) {
+  .petal-hide-768 { display: none; }
+}
+@media (max-width: 480px) {
+  .petal-hide-480 { display: none; }
+}
+
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(44,31,20,0.18);
+  border-radius: 99px;
 }

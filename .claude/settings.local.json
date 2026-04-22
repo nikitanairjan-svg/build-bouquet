@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp -r /Users/nikitanair/Desktop/Build-a-bouquet-app/bloomcraft/public/flowers /Users/nikitanair/Desktop/Build-a-bouquet-app/public/)",
+      "Bash(cp -r /Users/nikitanair/Desktop/Build-a-bouquet-app/bloomcraft/public/wraps /Users/nikitanair/Desktop/Build-a-bouquet-app/public/)",
+      "Bash(ls /Users/nikitanair/Desktop/Build-a-bouquet-app/*.*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(rm -rf /Users/nikitanair/Desktop/Build-a-bouquet-app/node_modules)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(curl -s -o /dev/null -w \"/ => %{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"/editor => %{http_code}\\\\n\" http://localhost:3000/editor)",
+      "Bash(curl -s -o /dev/null -w \"/library => %{http_code}\\\\n\" http://localhost:3000/library)",
+      "Bash(curl -s -o /dev/null -w \"/surprise => %{http_code}\\\\n\" http://localhost:3000/surprise)",
+      "Bash(npx tsc:*)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/editor)",
+      "Bash(curl -s http://localhost:3000/library)",
+      "Bash(curl -s http://localhost:3000/surprise)",
+      "Bash(curl -s http://localhost:3000/preview)"
+    ]
+  }
+}
