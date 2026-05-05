@@ -230,12 +230,10 @@ h1, h2, h3, h4, h5, h6 {
   outline-offset: 2px;
 }
 
-/* ─── Footer responsive ─────────────────────────────────────── */
+/* ─── Hero responsive ───────────────────────────────────────── */
 @media (max-width: 640px) {
-  .footer-grid {
-    grid-template-columns: 1fr !important;
-    gap: 32px !important;
-  }
+  .hero-headline { font-size: 22px !important; }
+  .hero-subtitle { font-size: 13px !important; padding: 0 20px !important; }
 }
 
 /* ─── Scattered petals — responsive visibility ───────────────── */

@@ -49,10 +49,10 @@ export default function EditorPage() {
             min-height: 0;
           }
           .editor-sidepanel {
-            position: static;
-            height: auto;
+            flex: 0 0 260px;
             width: 100%;
             border-left: none;
+            overflow: hidden;
           }
         }
         @media (max-width: 430px) {
@@ -62,30 +62,24 @@ export default function EditorPage() {
             padding: 8px 8px 6px 8px;
           }
           .editor-canvas-stack {
-            transform: scale(0.68);
+            transform: scale(0.92);
             transform-origin: center center;
-          }
-          .editor-header .editor-back-label {
-            display: none;
           }
           .editor-header .editor-preview-btn {
             padding: 6px 12px !important;
             font-size: 13px !important;
           }
         }
-        @media (max-width: 420px) {
-          .editor-canvas-stack { transform: scale(0.68); }
-        }
         @media (max-width: 360px) {
-          .editor-canvas-stack { transform: scale(0.62); }
+          .editor-canvas-stack { transform: scale(0.76); }
         }
-        }
+        /* Short phones (e.g. iPhone SE): cap so canvas doesn't overflow too far */
         @media (max-height: 780px) and (max-width: 640px) {
-          .editor-canvas-stack { transform: scale(0.64); }
+          .editor-canvas-stack { transform: scale(0.80); }
         }
         @media (max-height: 720px) and (max-width: 640px) {
-          .editor-canvas-stack { transform: scale(0.58); }
-          .editor-sidepanel { flex-basis: clamp(146px, 24vh, 180px); }
+          .editor-canvas-stack { transform: scale(0.72); }
+          .editor-sidepanel { flex: 0 0 clamp(146px, 24vh, 180px); }
         }
       `}</style>
 
@@ -138,14 +132,15 @@ export default function EditorPage() {
       {/* ── Main area ── */}
       <div className="editor-main">
 
-        {/* Canvas workspace — 80%, grid, canvas + toolbar centered together */}
+        {/* Canvas workspace */}
         <div className="editor-workspace">
           <CanvasHint />
-          {/* Canvas + toolbar as one centered unit */}
+          {/* Only Canvas in the scaled stack — CanvasControls must NOT be here
+              because transform:scale creates a new containing block that breaks
+              position:fixed on mobile */}
           <div className="editor-canvas-stack" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Canvas />
             <div style={{ height: 14 }} />
-            <CanvasControls />
           </div>
         </div>
 
@@ -154,6 +149,10 @@ export default function EditorPage() {
           <SidePanel />
         </div>
       </div>
+
+      {/* CanvasControls lives outside every transformed ancestor so that
+          position:fixed works correctly on mobile */}
+      <CanvasControls />
     </div>
   );
 }

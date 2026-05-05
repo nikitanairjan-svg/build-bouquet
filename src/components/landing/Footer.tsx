@@ -11,24 +11,26 @@ export default function Footer() {
         position: "relative",
       }}
     >
-      {/* Main footer row */}
+      {/* Main footer content */}
       <div
         style={{
           maxWidth: 1280,
           margin: "0 auto",
           padding: "clamp(28px, 4.5vh, 52px) clamp(24px, 5vw, 80px)",
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          gap: "clamp(24px, 5vw, 80px)",
-          alignItems: "start",
         }}
-        className="footer-grid"
       >
-        {/* Col 1 — Logo + tagline */}
-        <div>
+        {/* Top row — BloomCraft logo/name + social icons aligned on same line */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 14,
+          }}
+        >
           <Link
             href="/"
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 14 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none" }}
             aria-label="BloomCraft home"
           >
             <Image
@@ -51,21 +53,8 @@ export default function Footer() {
               BloomCraft
             </span>
           </Link>
-          <p
-            style={{
-              fontFamily: "var(--font-jost)",
-              fontSize: 14,
-              color: "rgba(61,40,23,0.50)",
-              lineHeight: 1.55,
-              maxWidth: 260,
-            }}
-          >
-            Digitally crafted, personally chosen.
-          </p>
-        </div>
 
-        {/* Col 2 — Social icons */}
-        <div>
+          {/* Social icons — right-aligned, same row as BloomCraft */}
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <a
               href="https://mail.google.com/mail/?view=cm&fs=1&to=nikitanair.design@gmail.com"
@@ -97,6 +86,19 @@ export default function Footer() {
             </a>
           </div>
         </div>
+
+        {/* Tagline */}
+        <p
+          style={{
+            fontFamily: "var(--font-jost)",
+            fontSize: 14,
+            color: "rgba(61,40,23,0.50)",
+            lineHeight: 1.55,
+            maxWidth: 260,
+          }}
+        >
+          Digitally crafted, personally chosen.
+        </p>
       </div>
 
       {/* Copyright bar */}

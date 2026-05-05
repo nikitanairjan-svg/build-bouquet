@@ -9,7 +9,7 @@ import { useBouquetStore, setSkipNextReset } from "@/store/bouquetStore";
 import { FLOWERS, getFlowerById } from "@/lib/flowers";
 import { WRAPS, WRAP_COLORS, getWrapImagePath } from "@/lib/wraps";
 import type { WrapColor } from "@/store/bouquetStore";
-import { buildBouquetShareUrl } from "@/lib/share";
+import { buildBouquetShareUrl, shareOrCopy } from "@/lib/share";
 import PaperGrain from "@/components/landing/PaperGrain";
 
 // Canvas dimensions (matches editor)
@@ -143,7 +143,9 @@ export default function SurprisePage() {
   }, []);
 
   const mobile = viewportW <= 640;
-  const stageDisplayW = Math.min(STAGE_DISPLAY_W, Math.max(290, viewportW - 32));
+  const stageDisplayW = mobile
+    ? Math.min(280, Math.max(240, viewportW - 64))
+    : Math.min(STAGE_DISPLAY_W, Math.max(290, viewportW - 32));
   const stageScale = stageDisplayW / CANVAS_W;
   const stageH = Math.round(CANVAS_H * stageScale);
 
@@ -171,43 +173,25 @@ export default function SurprisePage() {
     router.push("/editor");
   };
 
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
   const handleShare = async () => {
     if (!surprise) return;
-
     const url = buildBouquetShareUrl(
       surprise.wrapStyle,
       surprise.wrapColor,
       surprise.flowerIds.map((flowerId, zIndex) => {
         const pos = surprise.positions[zIndex];
-        return {
-          flowerId,
-          x: pos?.x ?? 50,
-          y: pos?.y ?? 40,
-          scale: pos?.scale ?? 0.9,
-          rotation: pos?.rotation ?? 0,
-          zIndex,
-        };
+        return { flowerId, x: pos?.x ?? 50, y: pos?.y ?? 40, scale: pos?.scale ?? 0.9, rotation: pos?.rotation ?? 0, zIndex };
       }),
       null,
     );
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "My BloomCraft Bouquet", url });
-      } catch {
-        // User may cancel native share sheet; no toast needed.
-      }
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setToastMsg("Link copied!");
-      setTimeout(() => setToastMsg(null), 2500);
-    } catch {
-      setToastMsg("Could not copy link");
-      setTimeout(() => setToastMsg(null), 2500);
-    }
+    const result = await shareOrCopy(url);
+    if (result === "copied") showToast("Link copied!");
+    else if (result === "failed") showToast("Could not share");
   };
 
   return (
@@ -236,6 +220,11 @@ export default function SurprisePage() {
           cursor: pointer; transition: background 150ms;
         }
         .sp-btn-filled:hover { background: #7A2A0D; }
+        @media (max-width: 640px) {
+          .sp-btn-outlined, .sp-btn-filled {
+            padding: 8px 16px; font-size: 14px; gap: 5px;
+          }
+        }
         .sp-up-0 { animation: spFadeUp 0.6s ease both 0s; }
         .sp-up-1 { animation: spFadeUp 0.6s ease both 0.5s; }
         @keyframes spFadeUp {
@@ -337,31 +326,31 @@ export default function SurprisePage() {
       {/* ── Main content ── */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: mobile ? "10px 12px 24px" : "8px 24px 32px",
+        alignItems: "center", justifyContent: mobile ? "flex-start" : "center",
+        padding: mobile ? "10px 12px 12px" : "8px 24px 32px",
         position: "relative", zIndex: 1,
       }}>
 
         {/* Title block */}
-        <div className="sp-up-0" style={{ textAlign: "center", marginBottom: 7 }}>
+        <div className="sp-up-0" style={{ textAlign: "center", marginBottom: mobile ? 6 : 7 }}>
           <p style={{
             fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-            fontSize: 16, color: "#C4756B", margin: "0 0 8px",
+            fontSize: mobile ? 16 : 16, color: "#C4756B", margin: mobile ? "0 0 4px" : "0 0 8px",
           }}>
             just for you
           </p>
           <h1 style={{
             fontFamily: "var(--font-cormorant)",
-            fontSize: "clamp(36px, 5vw, 52px)",
+            fontSize: mobile ? "clamp(28px, 7vw, 36px)" : "clamp(36px, 5vw, 52px)",
             fontWeight: 400, color: "#3D2B1F",
-            lineHeight: 1.1, margin: "0 0 12px",
+            lineHeight: 1.1, margin: mobile ? "0 0 6px" : "0 0 12px",
           }}>
             A little <em style={{ fontStyle: "italic" }}>surprise</em>
           </h1>
           {surprise && (
             <p style={{
               fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: 15, color: "#6B5E53", margin: 0,
+              fontSize: mobile ? 13 : 15, color: "#6B5E53", margin: 0,
             }}>
               {formatSubtitle(surprise.flowerIds, surprise.wrapColor, surprise.wrapStyle)}
             </p>
@@ -369,7 +358,7 @@ export default function SurprisePage() {
         </div>
 
         {/* Bouquet stage */}
-        <div style={{ position: "relative", marginBottom: 36 }}>
+        <div style={{ position: "relative", marginBottom: mobile ? 42 : 36 }}>
           {/* Elliptical shadow */}
           <div style={{
             position: "absolute", bottom: 6,

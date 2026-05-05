@@ -1,5 +1,30 @@
 import type { FlowerElement } from "@/store/bouquetStore";
 
+export const SHARE_MESSAGE = "Here is a digitally crafted bouquet for you 💐.";
+
+export type ShareResult = "shared" | "copied" | "failed";
+
+export async function shareOrCopy(url: string): Promise<ShareResult> {
+  if (typeof navigator === "undefined") return "failed";
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "BloomCraft Bouquet", text: SHARE_MESSAGE, url });
+      return "shared";
+    } catch (err) {
+      if ((err as Error).name === "AbortError") return "shared";
+      // share failed — fall through to clipboard
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(`${SHARE_MESSAGE} ${url}`);
+    return "copied";
+  } catch {
+    return "failed";
+  }
+}
+
 type ShareNote = { text: string; color: string } | null | undefined;
 
 export function buildBouquetShareUrl(

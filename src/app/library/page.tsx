@@ -9,7 +9,7 @@ import { setSkipNextReset } from "@/store/bouquetStore";
 import { getWrapImagePath } from "@/lib/wraps";
 import { getFlowerById } from "@/lib/flowers";
 import { GENERATED_BOUQUETS } from "@/lib/generatedBouquets";
-import { buildBouquetShareUrl } from "@/lib/share";
+import { buildBouquetShareUrl, shareOrCopy } from "@/lib/share";
 import PaperGrain from "@/components/landing/PaperGrain";
 
 // Scaled inner-canvas constants — mirrors editor canvas proportions exactly.
@@ -46,31 +46,15 @@ export default function LibraryPage() {
   const handleShare = async (bouquetIndex: number) => {
     const bouquet = GENERATED_BOUQUETS[bouquetIndex];
     if (!bouquet) return;
-
     const url = buildBouquetShareUrl(
       bouquet.wrapStyle,
       bouquet.wrapColor,
       bouquet.elements.map((el, zIndex) => ({ ...el, zIndex })),
       null,
     );
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: bouquet.name, url });
-      } catch {
-        // User may cancel native share sheet; no toast needed.
-      }
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setToastMsg("Link copied!");
-      setTimeout(() => setToastMsg(null), 2500);
-    } catch {
-      setToastMsg("Could not copy link");
-      setTimeout(() => setToastMsg(null), 2500);
-    }
+    const result = await shareOrCopy(url);
+    if (result === "copied") { setToastMsg("Link copied!"); setTimeout(() => setToastMsg(null), 2500); }
+    else if (result === "failed") { setToastMsg("Could not share"); setTimeout(() => setToastMsg(null), 2500); }
   };
 
   return (
@@ -85,7 +69,7 @@ export default function LibraryPage() {
         }
         @media (max-width: 1024px) { .lib-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width:  768px) { .lib-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width:  480px) { .lib-grid { grid-template-columns: 1fr; } }
+        @media (max-width:  480px) { .lib-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
         .lib-card {
           background: #F5F0E8;

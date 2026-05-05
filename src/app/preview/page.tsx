@@ -7,7 +7,7 @@ import { ArrowLeft, Share2 } from "lucide-react";
 import { useBouquetStore, setSkipNextReset, type FlowerElement } from "@/store/bouquetStore";
 import { getWrapImagePath } from "@/lib/wraps";
 import { getFlowerById } from "@/lib/flowers";
-import { buildBouquetShareUrl } from "@/lib/share";
+import { buildBouquetShareUrl, shareOrCopy } from "@/lib/share";
 import PaperGrain from "@/components/landing/PaperGrain";
 
 // ── Confetti burst — plays once on mount ────────────────────────
@@ -289,18 +289,11 @@ export default function PreviewPage() {
     router.push("/");
   };
 
-  const handleCopyLink = () => {
+  const handleShare = async () => {
     const url = buildBouquetShareUrl(wrapStyle, wrapColor, elements, note);
-    navigator.clipboard.writeText(url).then(() => showToast("Link copied!"));
-  };
-
-  const handleShare = () => {
-    const url = buildBouquetShareUrl(wrapStyle, wrapColor, elements, note);
-    if (navigator.share) {
-      navigator.share({ title: "My BloomCraft Bouquet", url });
-    } else {
-      navigator.clipboard.writeText(url).then(() => showToast("Link copied!"));
-    }
+    const result = await shareOrCopy(url);
+    if (result === "copied") showToast("Link copied!");
+    else if (result === "failed") showToast("Could not share");
   };
 
   return (
@@ -405,17 +398,17 @@ export default function PreviewPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          padding: mobile ? "24px 12px 34px" : "40px 24px 60px",
+          justifyContent: mobile ? "flex-start" : "center",
+          padding: mobile ? "14px 12px 20px" : "40px 24px 60px",
           width: "100%",
           maxWidth: 520,
         }}>
 
           {/* Headline + subtitle */}
-          <div className="fu fu-0" style={{ textAlign: "center", marginBottom: 32 }}>
+          <div className="fu fu-0" style={{ textAlign: "center", marginBottom: mobile ? 14 : 32 }}>
             <h1 style={{
               fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: "clamp(34px, 5vw, 48px)", fontWeight: 400,
+              fontSize: mobile ? "clamp(26px, 6vw, 34px)" : "clamp(34px, 5vw, 48px)", fontWeight: 400,
               color: "var(--lnd-brown)", lineHeight: 1.15,
               margin: "0 0 10px",
             }}>
@@ -423,7 +416,7 @@ export default function PreviewPage() {
             </h1>
             <p style={{
               fontFamily: "var(--font-jost)",
-              fontSize: 15, fontWeight: 400,
+              fontSize: mobile ? 13 : 15, fontWeight: 400,
               color: "rgba(61,40,23,0.55)",
               lineHeight: 1.6, margin: 0,
             }}>
@@ -524,6 +517,7 @@ export default function PreviewPage() {
       {showNote && note && (
         <NoteReadModal note={note} onClose={() => setShowNote(false)} />
       )}
+
     </>
   );
 }

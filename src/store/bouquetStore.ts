@@ -48,6 +48,7 @@ interface BouquetStore {
   rearrangeOriginalIds: string[] | null;
   selectedId: number | null;
   _nextId: number;
+  sheetExpanded: boolean;
 
   addFlower(flowerId: string, x: number, y: number, scale: number): void;
   removeFlower(id: number): void;
@@ -57,6 +58,7 @@ interface BouquetStore {
   duplicateFlower(id: number): void;
   selectFlower(id: number | null): void;
   deselect(): void;
+  setSheetExpanded(val: boolean): void;
   setWrapStyle(n: number): void;
   setWrapColor(color: WrapColor): void;
   setNote(text: string, color: string): void;
@@ -109,6 +111,7 @@ export const INITIAL_STATE = {
   rearrangeOriginalIds: null,
   selectedId: null,
   _nextId: 1,
+  sheetExpanded: false,
 };
 
 // No persist — canvas always starts fresh. Saved bouquets live in the library.
@@ -210,6 +213,7 @@ export const useBouquetStore = create<BouquetStore>()((set, get) => ({
 
   selectFlower(id) { set({ selectedId: id }); },
   deselect() { set({ selectedId: null }); },
+  setSheetExpanded(val) { set({ sheetExpanded: val }); },
 
   setWrapStyle(n) { set({ wrapStyle: Math.max(1, Math.min(9, n)) }); },
   setWrapColor(color) { set({ wrapColor: color }); },

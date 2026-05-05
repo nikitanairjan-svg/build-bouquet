@@ -41,13 +41,14 @@ export default function NoteModal({
         position: "fixed", inset: 0, zIndex: 1000,
         backgroundColor: "rgba(61,43,31,0.40)",
         display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 24px",
       }}
       onClick={onClose}
     >
       {/* ── Stacking wrapper — both layers are sized relative to this ── */}
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ position: "relative", maxWidth: 380, width: "90%" }}
+        style={{ position: "relative", maxWidth: 320, width: "100%" }}
       >
 
         {/* ── Layer 1: Kraft envelope (behind, tilted right) ── */}
@@ -94,7 +95,7 @@ export default function NoteModal({
             backgroundColor: "#FAF6F0",
             transform: "rotate(-2deg)",
             transformOrigin: "center bottom",
-            padding: "30px 30px 26px",
+            padding: "22px 22px 18px",
             // Perforated stamp edges
             ...stampMaskStyle,
           }}
@@ -118,14 +119,14 @@ export default function NoteModal({
             style={{
               width: "100%", boxSizing: "border-box", resize: "none",
               fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: 14, lineHeight: "26px", color: "#6B5E53",
+              fontSize: 16, lineHeight: "26px", color: "#6B5E53",
               backgroundColor: "transparent",
               backgroundImage: "repeating-linear-gradient(transparent, transparent 25px, rgba(61,43,31,0.07) 25px, rgba(61,43,31,0.07) 26px)",
               backgroundPosition: "0 2px",
               border: "none", outline: "none",
               padding: "2px 0",
               display: "block",
-              minHeight: 104,
+              minHeight: 80,
             }}
           />
 
