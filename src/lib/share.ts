@@ -7,9 +7,11 @@ export type ShareResult = "shared" | "copied" | "failed";
 export async function shareOrCopy(url: string): Promise<ShareResult> {
   if (typeof navigator === "undefined") return "failed";
 
+  const shareText = `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`;
+
   if (navigator.share) {
     try {
-      await navigator.share({ title: "BloomCraft Bouquet", text: SHARE_MESSAGE, url });
+      await navigator.share({ title: "BloomCraft Bouquet", text: shareText });
       return "shared";
     } catch (err) {
       if ((err as Error).name === "AbortError") return "shared";
@@ -18,7 +20,7 @@ export async function shareOrCopy(url: string): Promise<ShareResult> {
   }
 
   try {
-    await navigator.clipboard.writeText(`${SHARE_MESSAGE}\n\nClick Here To View: ${url}`);
+    await navigator.clipboard.writeText(shareText);
     return "copied";
   } catch {
     return "failed";
