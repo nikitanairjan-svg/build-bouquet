@@ -399,18 +399,18 @@ export default function PreviewPage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: mobile ? "flex-start" : "center",
-          padding: mobile ? "14px 12px 20px" : "40px 24px 60px",
+          padding: mobile ? "6px 12px 20px" : "40px 24px 60px",
           width: "100%",
           maxWidth: 520,
         }}>
 
           {/* Headline + subtitle */}
-          <div className="fu fu-0" style={{ textAlign: "center", marginBottom: mobile ? 14 : 32 }}>
+          <div className="fu fu-0" style={{ textAlign: "center", marginBottom: mobile ? 8 : 32 }}>
             <h1 style={{
               fontFamily: "var(--font-cormorant)", fontStyle: "italic",
               fontSize: mobile ? "clamp(26px, 6vw, 34px)" : "clamp(34px, 5vw, 48px)", fontWeight: 400,
               color: "var(--lnd-brown)", lineHeight: 1.15,
-              margin: "0 0 10px",
+              margin: mobile ? "0 0 6px" : "0 0 10px",
             }}>
               Your bouquet is ready
             </h1>

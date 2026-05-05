@@ -108,7 +108,6 @@ export default function FlowerPicker() {
             display: flex !important;
             gap: 8px !important;
             overflow-x: auto !important;
-            // overflow-y: hidden !important;
             padding-bottom: 4px;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
@@ -118,6 +117,8 @@ export default function FlowerPicker() {
             min-width: 104px !important;
             flex: 0 0 104px !important;
           }
+          .bloom-img-area { aspect-ratio: 5/4 !important; }
+          .bloom-footer { height: 28px !important; }
         }
       `}</style>
 
@@ -178,7 +179,7 @@ export default function FlowerPicker() {
               }}
             >
               {/* ── Image area — square warm box ── */}
-              <div style={{
+              <div className="bloom-img-area" style={{
                 position: "relative",
                 margin: "6px 6px 0",
                 borderRadius: 7,
@@ -213,7 +214,7 @@ export default function FlowerPicker() {
               </div>
 
               {/* ── Footer — fixed height, switches between name and qty ── */}
-              <div style={{
+              <div className="bloom-footer" style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

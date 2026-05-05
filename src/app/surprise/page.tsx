@@ -207,11 +207,11 @@ export default function SurprisePage() {
         .sp-btn-outlined {
           display: inline-flex; align-items: center; gap: 7px;
           padding: 10px 22px; border-radius: 8px;
-          border: 1px solid #D8D0C4; background: transparent;
+          border: 1px solid #C8BFB4; background: #EDE6DA;
           font-family: var(--font-cormorant); font-size: 15px; color: #3D2B1F;
           cursor: pointer; transition: background 150ms;
         }
-        .sp-btn-outlined:hover { background: #EDE6DA; }
+        .sp-btn-outlined:hover { background: #E0D8CE; }
         .sp-btn-filled {
           display: inline-flex; align-items: center; gap: 7px;
           padding: 10px 22px; border-radius: 8px;

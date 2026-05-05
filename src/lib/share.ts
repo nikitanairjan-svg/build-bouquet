@@ -18,7 +18,7 @@ export async function shareOrCopy(url: string): Promise<ShareResult> {
   }
 
   try {
-    await navigator.clipboard.writeText(`${SHARE_MESSAGE} ${url}`);
+    await navigator.clipboard.writeText(`${SHARE_MESSAGE}\n\nClick Here To View: ${url}`);
     return "copied";
   } catch {
     return "failed";
