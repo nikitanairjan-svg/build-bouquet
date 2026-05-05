@@ -20,7 +20,7 @@ export async function shareOrCopy(url: string): Promise<ShareResult> {
   const shortUrl = await shortenURL(url);
 
   const TITLE = "A digital bouquet for you 💐";
-  const TEXT  = "Someone made you a special digital bouquet!";
+  const TEXT  = "Someone made you a special digital bouquet 💐";
 
   // Native share: url is a separate field — no raw URL in the message body.
   if (navigator.share) {

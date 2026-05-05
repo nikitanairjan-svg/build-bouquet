@@ -87,9 +87,7 @@ const WRAP_W      = 340;
 const WRAP_H      = 460;
 const FLOWER_SIZE = 88;
 
-const DISPLAY_W     = 410;
-const DISPLAY_SCALE = DISPLAY_W / CANVAS_W;
-const DISPLAY_H     = Math.round(CANVAS_H * DISPLAY_SCALE);
+const DISPLAY_W_DESKTOP = 410;
 
 // ── Stamp / perforated-edge mask ──────────────────────────────────
 const STAMP_MASK = [
@@ -276,6 +274,11 @@ export default function BouquetReceiver() {
 
   const mobile = viewportW <= 640;
 
+  // On mobile, shrink the bouquet so it fits alongside logo + text + button
+  const displayW     = mobile ? Math.min(300, viewportW - 50) : DISPLAY_W_DESKTOP;
+  const displayScale = displayW / CANVAS_W;
+  const displayH     = Math.round(CANVAS_H * displayScale);
+
   const wrapColor = bouquet.c as "brown" | "pink" | "lilac";
   const wrapSrc   = getWrapImagePath(bouquet.s, wrapColor);
   const sorted    = [...bouquet.e].sort((a, b) => a.z - b.z);
@@ -321,7 +324,8 @@ export default function BouquetReceiver() {
             transition={{ duration: 0.4 }} style={{ marginBottom: mobile ? 2 : 6 }}>
             <button onClick={() => router.push("/")} aria-label="Go to home"
               style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-              <Image src="/preloader/logo.svg" alt="BloomCraft" width={80} height={80}
+              <Image src="/preloader/logo.svg" alt="BloomCraft"
+                width={mobile ? 52 : 80} height={mobile ? 52 : 80}
                 style={{ objectFit: "contain", display: "block" }} />
             </button>
           </motion.div>
@@ -329,13 +333,13 @@ export default function BouquetReceiver() {
           {/* B. Greeting */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-            style={{ textAlign: "center", marginBottom: mobile ? 6 : 14 }}>
+            style={{ textAlign: "center", marginBottom: mobile ? 4 : 14 }}>
             <h1 style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: 26, fontWeight: 400, color: "#3D2B1F", lineHeight: 1.2, margin: "0 0 4px" }}>
+              fontSize: mobile ? 22 : 26, fontWeight: 400, color: "#3D2B1F", lineHeight: 1.2, margin: "0 0 3px" }}>
               This one&apos;s for you
             </h1>
             <p style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: 16, color: "#4A3B30", margin: 0 }}>
+              fontSize: mobile ? 14 : 16, color: "#4A3B30", margin: 0 }}>
               A digital bouquet, handcrafted with care
             </p>
           </motion.div>
@@ -345,23 +349,23 @@ export default function BouquetReceiver() {
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.6 }}
-            style={{ position: "relative", marginBottom: mobile ? 8 : 14 }}
+            style={{ position: "relative", marginBottom: mobile ? 6 : 14 }}
           >
             {/* Elliptical shadow */}
             <div style={{
               position: "absolute", bottom: 4, left: "50%", transform: "translateX(-50%)",
-              width: Math.round(DISPLAY_W * 0.55), height: 16,
+              width: Math.round(displayW * 0.55), height: 16,
               background: "radial-gradient(ellipse at center, rgba(61,43,31,0.16) 0%, transparent 70%)",
               borderRadius: "50%", zIndex: 0,
             }} />
 
             {/* Scaled canvas */}
-            <div style={{ position: "relative", width: DISPLAY_W, height: DISPLAY_H, zIndex: 1 }}>
+            <div style={{ position: "relative", width: displayW, height: displayH, zIndex: 1 }}>
               <div style={{
                 position: "absolute", top: 0,
                 left: `calc(50% - ${CANVAS_W / 2}px)`,
                 width: CANVAS_W, height: CANVAS_H,
-                transform: `scale(${DISPLAY_SCALE})`,
+                transform: `scale(${displayScale})`,
                 transformOrigin: "top center",
                 pointerEvents: "none",
               }}>
