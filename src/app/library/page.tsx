@@ -24,8 +24,9 @@ const CARD_SCALE  = CARD_IMG_H / CANVAS_H; // ≈ 0.4231 — fits full canvas in
 export default function LibraryPage() {
   const router     = useRouter();
   const loadPreset = useBouquetStore((s) => s.loadPreset);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [hovBack,  setHovBack]  = useState(false);
+  const [toastMsg,     setToastMsg]     = useState<string | null>(null);
+  const [hovBack,      setHovBack]      = useState(false);
+  const [sharingIndex, setSharingIndex] = useState<number | null>(null);
 
   const handleBack = () => router.push("/");
 
@@ -46,15 +47,20 @@ export default function LibraryPage() {
   const handleShare = async (bouquetIndex: number) => {
     const bouquet = GENERATED_BOUQUETS[bouquetIndex];
     if (!bouquet) return;
-    const url = buildBouquetShareUrl(
-      bouquet.wrapStyle,
-      bouquet.wrapColor,
-      bouquet.elements.map((el, zIndex) => ({ ...el, zIndex })),
-      null,
-    );
-    const result = await shareOrCopy(url);
-    if (result === "copied") { setToastMsg("Link copied!"); setTimeout(() => setToastMsg(null), 2500); }
-    else if (result === "failed") { setToastMsg("Could not share"); setTimeout(() => setToastMsg(null), 2500); }
+    setSharingIndex(bouquetIndex);
+    try {
+      const url = buildBouquetShareUrl(
+        bouquet.wrapStyle,
+        bouquet.wrapColor,
+        bouquet.elements.map((el, zIndex) => ({ ...el, zIndex })),
+        null,
+      );
+      const result = await shareOrCopy(url);
+      if (result === "copied") { setToastMsg("Link copied!"); setTimeout(() => setToastMsg(null), 2500); }
+      else if (result === "failed") { setToastMsg("Could not share"); setTimeout(() => setToastMsg(null), 2500); }
+    } finally {
+      setSharingIndex(null);
+    }
   };
 
   return (
@@ -270,9 +276,15 @@ export default function LibraryPage() {
                       <Pencil size={12} strokeWidth={1.8} />
                       Edit
                     </button>
-                    <button className="lib-share-btn" onClick={() => handleShare(index)}>
-                      <Share2 size={12} strokeWidth={1.8} />
-                      Share
+                    <button
+                      className="lib-share-btn"
+                      onClick={() => handleShare(index)}
+                      disabled={sharingIndex === index}
+                      style={{ opacity: sharingIndex === index ? 0.75 : undefined, whiteSpace: "nowrap" }}
+                    >
+                      {sharingIndex === index
+                        ? "Preparing…"
+                        : <><Share2 size={12} strokeWidth={1.8} />Share</>}
                     </button>
                   </div>
                 </div>

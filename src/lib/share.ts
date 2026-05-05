@@ -1,33 +1,43 @@
 import type { FlowerElement } from "@/store/bouquetStore";
 
-export const SHARE_MESSAGE = "Here is a digitally crafted bouquet for you 💐.";
-
 export type ShareResult = "shared" | "copied" | "failed";
+
+async function shortenURL(longURL: string): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longURL)}`
+    );
+    if (res.ok) return await res.text();
+    return longURL;
+  } catch {
+    return longURL; // silently fall back to long URL
+  }
+}
 
 export async function shareOrCopy(url: string): Promise<ShareResult> {
   if (typeof navigator === "undefined") return "failed";
 
-  // Native share: text + url are separate fields so the raw URL never
-  // appears inside the message body — apps render it as a link preview.
+  const shortUrl = await shortenURL(url);
+
+  const TITLE = "A digital bouquet for you 💐";
+  const TEXT  = "Someone made you a special digital bouquet!";
+
+  // Native share: url is a separate field — no raw URL in the message body.
   if (navigator.share) {
     try {
-      await navigator.share({
-        title: "BloomCraft Bouquet",
-        text: `${SHARE_MESSAGE}\n\nClick Here To View`,
-        url,
-      });
+      await navigator.share({ title: TITLE, text: TEXT, url: shortUrl });
       return "shared";
     } catch (err) {
       if ((err as Error).name === "AbortError") return "shared";
-      // share failed — fall through to clipboard
+      // fall through to clipboard
     }
   }
 
-  // Clipboard: write HTML so "Click Here To View" is a real hyperlink
-  // when pasted into email / rich-text apps; plain-text apps get fallback.
+  // Clipboard: HTML so "Click Here To View" is a real hyperlink in rich-text
+  // apps; plain-text destinations get a readable fallback.
   try {
-    const html   = `${SHARE_MESSAGE}<br><br><a href="${url}">Click Here To View</a>`;
-    const plain  = `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`;
+    const html  = `${TEXT}<br><br><a href="${shortUrl}">Click Here To View</a>`;
+    const plain = `${TEXT}\n\nClick Here To View: ${shortUrl}`;
     await navigator.clipboard.write([
       new ClipboardItem({
         "text/html":  new Blob([html],  { type: "text/html" }),
@@ -36,10 +46,9 @@ export async function shareOrCopy(url: string): Promise<ShareResult> {
     ]);
     return "copied";
   } catch {
-    // ClipboardItem not supported — plain text fallback
     try {
       await navigator.clipboard.writeText(
-        `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`,
+        `${TEXT}\n\nClick Here To View: ${shortUrl}`
       );
       return "copied";
     } catch {

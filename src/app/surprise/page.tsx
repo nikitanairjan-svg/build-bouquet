@@ -129,11 +129,12 @@ export default function SurprisePage() {
   const router     = useRouter();
   const loadPreset = useBouquetStore(s => s.loadPreset);
 
-  const [rollKey,  setRollKey]  = useState(0);
-  const [surprise, setSurprise] = useState<SurpriseState | null>(null);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [hovBack,  setHovBack]  = useState(false);
+  const [rollKey,   setRollKey]   = useState(0);
+  const [surprise,  setSurprise]  = useState<SurpriseState | null>(null);
+  const [toastMsg,  setToastMsg]  = useState<string | null>(null);
+  const [hovBack,   setHovBack]   = useState(false);
   const [viewportW, setViewportW] = useState(1024);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     const update = () => setViewportW(window.innerWidth);
@@ -180,18 +181,23 @@ export default function SurprisePage() {
 
   const handleShare = async () => {
     if (!surprise) return;
-    const url = buildBouquetShareUrl(
-      surprise.wrapStyle,
-      surprise.wrapColor,
-      surprise.flowerIds.map((flowerId, zIndex) => {
-        const pos = surprise.positions[zIndex];
-        return { flowerId, x: pos?.x ?? 50, y: pos?.y ?? 40, scale: pos?.scale ?? 0.9, rotation: pos?.rotation ?? 0, zIndex };
-      }),
-      null,
-    );
-    const result = await shareOrCopy(url);
-    if (result === "copied") showToast("Link copied!");
-    else if (result === "failed") showToast("Could not share");
+    setIsSharing(true);
+    try {
+      const url = buildBouquetShareUrl(
+        surprise.wrapStyle,
+        surprise.wrapColor,
+        surprise.flowerIds.map((flowerId, zIndex) => {
+          const pos = surprise.positions[zIndex];
+          return { flowerId, x: pos?.x ?? 50, y: pos?.y ?? 40, scale: pos?.scale ?? 0.9, rotation: pos?.rotation ?? 0, zIndex };
+        }),
+        null,
+      );
+      const result = await shareOrCopy(url);
+      if (result === "copied") showToast("Link copied!");
+      else if (result === "failed") showToast("Could not share");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -457,9 +463,9 @@ export default function SurprisePage() {
             <Pencil size={14} strokeWidth={1.8} />
             Edit this
           </button>
-          <button className="sp-btn-filled" onClick={handleShare}>
-            <Share2 size={14} strokeWidth={1.8} />
-            Share
+          <button className="sp-btn-filled" onClick={handleShare} disabled={isSharing}
+            style={{ opacity: isSharing ? 0.75 : undefined, cursor: isSharing ? "default" : undefined, whiteSpace: "nowrap" }}>
+            {isSharing ? "Preparing link…" : <><Share2 size={14} strokeWidth={1.8} />Share</>}
           </button>
         </div>
       </div>

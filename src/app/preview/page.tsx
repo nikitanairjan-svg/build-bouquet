@@ -260,6 +260,7 @@ export default function PreviewPage() {
   const [showNote,     setShowNote]     = useState(false);
   const [hovBack,      setHovBack]      = useState(false);
   const [viewportW,    setViewportW]    = useState(1024);
+  const [isSharing,    setIsSharing]    = useState(false);
 
   useEffect(() => {
     const update = () => setViewportW(window.innerWidth);
@@ -290,10 +291,15 @@ export default function PreviewPage() {
   };
 
   const handleShare = async () => {
-    const url = buildBouquetShareUrl(wrapStyle, wrapColor, elements, note);
-    const result = await shareOrCopy(url);
-    if (result === "copied") showToast("Link copied!");
-    else if (result === "failed") showToast("Could not share");
+    setIsSharing(true);
+    try {
+      const url = buildBouquetShareUrl(wrapStyle, wrapColor, elements, note);
+      const result = await shareOrCopy(url);
+      if (result === "copied") showToast("Link copied!");
+      else if (result === "failed") showToast("Could not share");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -374,20 +380,25 @@ export default function PreviewPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={handleShare}
+              disabled={isSharing}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 padding: mobile ? "7px 12px" : "7px 16px", borderRadius: 99,
-                border: "none", backgroundColor: "#963310",
+                border: "none", backgroundColor: isSharing ? "#B85A30" : "#963310",
                 fontFamily: "var(--font-cormorant)", fontSize: 14,
-                color: "#FFF8F0", cursor: "pointer",
+                color: "#FFF8F0", cursor: isSharing ? "default" : "pointer",
                 boxShadow: "0 4px 14px rgba(150,51,16,0.28)",
-                transition: "opacity 150ms",
+                transition: "background 150ms, opacity 150ms",
+                whiteSpace: "nowrap",
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.88")}
+              onMouseEnter={(e) => { if (!isSharing) (e.currentTarget as HTMLElement).style.opacity = "0.88"; }}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
             >
-              <Share2 size={13} strokeWidth={1.8} />
-              Share
+              {isSharing ? (
+                "Preparing link…"
+              ) : (
+                <><Share2 size={13} strokeWidth={1.8} />Share</>
+              )}
             </button>
           </div>
         </header>
