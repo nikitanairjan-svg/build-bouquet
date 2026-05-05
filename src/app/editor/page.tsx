@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import Canvas from "@/components/editor/Canvas";
 import CanvasControls from "@/components/editor/CanvasControls";
 import CanvasHint from "@/components/editor/CanvasHint";
@@ -40,6 +42,7 @@ export default function EditorPage() {
         }
         @media (max-width: 960px) {
           .editor-header { padding: 0 14px !important; }
+          .editor-back-label { display: none; }
           .editor-main {
             flex-direction: column;
             height: calc(100dvh - 56px);
@@ -126,6 +129,20 @@ export default function EditorPage() {
       }}>
         <EditorBackButton />
 
+        {/* Logo — center */}
+        <Link href="/" aria-label="Go to home" style={{
+          position: "absolute", left: "50%", transform: "translateX(-50%)",
+          display: "flex", alignItems: "center",
+        }}>
+          <Image
+            src="/preloader/logo.svg"
+            alt="BloomCraft"
+            width={36}
+            height={36}
+            style={{ objectFit: "contain", display: "block" }}
+          />
+        </Link>
+
         <PreviewButton />
       </header>
 
@@ -142,6 +159,10 @@ export default function EditorPage() {
             <Canvas />
             <div style={{ height: 14 }} />
           </div>
+          {/* CanvasControls sits inside the workspace (not the transformed canvas-stack)
+              so desktop absolute-positioning works, and mobile position:fixed still
+              escapes to the viewport (workspace has no transform/filter/will-change) */}
+          <CanvasControls />
         </div>
 
         {/* Side panel — 20% */}
@@ -149,10 +170,6 @@ export default function EditorPage() {
           <SidePanel />
         </div>
       </div>
-
-      {/* CanvasControls lives outside every transformed ancestor so that
-          position:fixed works correctly on mobile */}
-      <CanvasControls />
     </div>
   );
 }

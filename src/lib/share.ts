@@ -7,11 +7,15 @@ export type ShareResult = "shared" | "copied" | "failed";
 export async function shareOrCopy(url: string): Promise<ShareResult> {
   if (typeof navigator === "undefined") return "failed";
 
-  const shareText = `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`;
-
+  // Native share: text + url are separate fields so the raw URL never
+  // appears inside the message body — apps render it as a link preview.
   if (navigator.share) {
     try {
-      await navigator.share({ title: "BloomCraft Bouquet", text: shareText });
+      await navigator.share({
+        title: "BloomCraft Bouquet",
+        text: `${SHARE_MESSAGE}\n\nClick Here To View`,
+        url,
+      });
       return "shared";
     } catch (err) {
       if ((err as Error).name === "AbortError") return "shared";
@@ -19,11 +23,28 @@ export async function shareOrCopy(url: string): Promise<ShareResult> {
     }
   }
 
+  // Clipboard: write HTML so "Click Here To View" is a real hyperlink
+  // when pasted into email / rich-text apps; plain-text apps get fallback.
   try {
-    await navigator.clipboard.writeText(shareText);
+    const html   = `${SHARE_MESSAGE}<br><br><a href="${url}">Click Here To View</a>`;
+    const plain  = `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`;
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html":  new Blob([html],  { type: "text/html" }),
+        "text/plain": new Blob([plain], { type: "text/plain" }),
+      }),
+    ]);
     return "copied";
   } catch {
-    return "failed";
+    // ClipboardItem not supported — plain text fallback
+    try {
+      await navigator.clipboard.writeText(
+        `${SHARE_MESSAGE}\n\nClick Here To View: ${url}`,
+      );
+      return "copied";
+    } catch {
+      return "failed";
+    }
   }
 }
 

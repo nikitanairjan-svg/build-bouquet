@@ -258,16 +258,23 @@ export default function BouquetReceiver() {
   const [mounted,  setMounted]  = useState(false);
   const [noteOpen,      setNoteOpen]      = useState(false);
   const [noteEverOpened, setNoteEverOpened] = useState(false);
+  const [viewportW, setViewportW] = useState(1024);
 
   useEffect(() => {
     setMounted(true);
     const decoded = decodeBouquet(window.location.search);
     setBouquet(decoded ?? "error");
+    const update = () => setViewportW(window.innerWidth);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
   if (!mounted)            return null;
   if (bouquet === "error") return <ErrorState />;
   if (!bouquet)            return null;
+
+  const mobile = viewportW <= 640;
 
   const wrapColor = bouquet.c as "brown" | "pink" | "lilac";
   const wrapSrc   = getWrapImagePath(bouquet.s, wrapColor);
@@ -307,11 +314,11 @@ export default function BouquetReceiver() {
 
         {/* ── Content ── */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-          padding: "12px 24px 12px", position: "relative", zIndex: 1, width: "100%" }}>
+          padding: mobile ? "8px 24px 12px" : "12px 24px 12px", position: "relative", zIndex: 1, width: "100%" }}>
 
           {/* A. Logo */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }} style={{ marginBottom: 6 }}>
+            transition={{ duration: 0.4 }} style={{ marginBottom: mobile ? 2 : 6 }}>
             <button onClick={() => router.push("/")} aria-label="Go to home"
               style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
               <Image src="/preloader/logo.svg" alt="BloomCraft" width={80} height={80}
@@ -322,7 +329,7 @@ export default function BouquetReceiver() {
           {/* B. Greeting */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-            style={{ textAlign: "center", marginBottom: 14 }}>
+            style={{ textAlign: "center", marginBottom: mobile ? 6 : 14 }}>
             <h1 style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
               fontSize: 26, fontWeight: 400, color: "#3D2B1F", lineHeight: 1.2, margin: "0 0 4px" }}>
               This one&apos;s for you
@@ -338,7 +345,7 @@ export default function BouquetReceiver() {
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.6 }}
-            style={{ position: "relative", marginBottom: 14 }}
+            style={{ position: "relative", marginBottom: mobile ? 8 : 14 }}
           >
             {/* Elliptical shadow */}
             <div style={{

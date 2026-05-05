@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUp, ArrowDown, RotateCw, Maximize2, Trash2 } from "lucide-react";
 import { useBouquetStore, type FlowerElement } from "@/store/bouquetStore";
 
 const CANVAS_W    = 420;
 const CANVAS_H    = 520;
-const TOOLBAR_W   = 224;
-const TOOLBAR_H   = 40;
 const FLOWER_BASE = 88;
+
+// Desktop toolbar dimensions
+const TOOLBAR_W_D = 224;
+const TOOLBAR_H_D = 40;
+
+// Mobile toolbar dimensions — larger so touch targets are comfortable after canvas scale
+const TOOLBAR_W_M = 310;
+const TOOLBAR_H_M = 58;
 
 // Palette
 const BG        = "#F0EAE0";
@@ -24,10 +30,11 @@ function clamp(v: number, lo: number, hi: number) {
 
 // ── Slider popover ───────────────────────────────────────────────
 function SliderPopover({
-  label, value, min, max, step, onChange, format,
+  label, value, min, max, step, onChange, format, mobile,
 }: {
   label: string; value: number; min: number; max: number;
   step: number; onChange: (v: number) => void; format: (v: number) => string;
+  mobile?: boolean;
 }) {
   return (
     <div
@@ -39,28 +46,28 @@ function SliderPopover({
         transform: "translateX(-50%)",
         backgroundColor: BG,
         border: `0.5px solid ${BORDER}`,
-        borderRadius: 10,
-        padding: "10px 14px",
-        width: 160,
+        borderRadius: 12,
+        padding: mobile ? "14px 18px" : "10px 14px",
+        width: mobile ? 210 : 160,
         boxShadow: "0 4px 16px rgba(61,43,31,0.10)",
         zIndex: 10,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: mobile ? 10 : 6 }}>
         <span style={{
-          fontFamily: "var(--font-jost)", fontSize: 9.5, fontWeight: 600,
+          fontFamily: "var(--font-jost)", fontSize: mobile ? 11 : 9.5, fontWeight: 600,
           letterSpacing: "1.5px", textTransform: "uppercase", color: "#8B2500",
         }}>
           {label}
         </span>
-        <span style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic", fontSize: 12, color: "#3D2B1F" }}>
+        <span style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic", fontSize: mobile ? 14 : 12, color: "#3D2B1F" }}>
           {format(value)}
         </span>
       </div>
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        style={{ width: "100%", accentColor: "#963310", cursor: "pointer" }}
+        style={{ width: "100%", accentColor: "#963310", cursor: "pointer", height: mobile ? 20 : undefined }}
       />
     </div>
   );
@@ -68,10 +75,11 @@ function SliderPopover({
 
 // ── Toolbar button ───────────────────────────────────────────────
 function TBtn({
-  children, title, onClick, active, danger, disabled,
+  children, title, onClick, active, danger, disabled, btnW, btnH,
 }: {
   children: React.ReactNode; title: string;
   onClick: () => void; active?: boolean; danger?: boolean; disabled?: boolean;
+  btnW: number; btnH: number;
 }) {
   const [hov, setHov] = useState(false);
   return (
@@ -82,7 +90,7 @@ function TBtn({
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        width: 38, height: TOOLBAR_H,
+        width: btnW, height: btnH,
         border: "none",
         background: disabled ? "transparent"
           : hov ? HOV_BG
@@ -108,6 +116,19 @@ function TBtn({
 export default function FlowerToolbar({ elem }: { elem: FlowerElement }) {
   const { elements, updateFlower, updateFlowerLive, removeFlower } = useBouquetStore();
   const [openSlider, setOpenSlider] = useState<"rotate" | "resize" | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 960);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const TOOLBAR_W = isMobile ? TOOLBAR_W_M : TOOLBAR_W_D;
+  const TOOLBAR_H = isMobile ? TOOLBAR_H_M : TOOLBAR_H_D;
+  const BTN_W     = isMobile ? 54 : 38;
+  const ICON_SZ   = isMobile ? 24 : 18;
 
   const xPx = (elem.x / 100) * CANVAS_W;
   const yPx = (elem.y / 100) * CANVAS_H;
@@ -168,10 +189,10 @@ export default function FlowerToolbar({ elem }: { elem: FlowerElement }) {
         width: TOOLBAR_W, height: TOOLBAR_H,
         zIndex: 200, display: "flex", alignItems: "center",
         gap: 0, padding: "0 4px",
-        borderRadius: 10,
+        borderRadius: 12,
         backgroundColor: BG,
         border: `0.5px solid ${BORDER}`,
-        boxShadow: "0 2px 8px rgba(61,43,31,0.08)",
+        boxShadow: "0 2px 12px rgba(61,43,31,0.12)",
       }}
     >
       {/* Arrow tip — points toward the flower (down when above, up when below) */}
@@ -195,18 +216,18 @@ export default function FlowerToolbar({ elem }: { elem: FlowerElement }) {
         </svg>
       )}
 
-      <TBtn title="Bring to front" onClick={bringToFront} disabled={!canBringFwd}>
-        <ArrowUp size={18} strokeWidth={1.8} />
+      <TBtn title="Bring to front" onClick={bringToFront} disabled={!canBringFwd} btnW={BTN_W} btnH={TOOLBAR_H}>
+        <ArrowUp size={ICON_SZ} strokeWidth={1.8} />
       </TBtn>
-      <TBtn title="Send to back" onClick={sendToBack} disabled={!canSendBack}>
-        <ArrowDown size={18} strokeWidth={1.8} />
+      <TBtn title="Send to back" onClick={sendToBack} disabled={!canSendBack} btnW={BTN_W} btnH={TOOLBAR_H}>
+        <ArrowDown size={ICON_SZ} strokeWidth={1.8} />
       </TBtn>
 
       <Sep />
 
       <div style={{ position: "relative" }}>
-        <TBtn title="Rotate" onClick={() => toggleSlider("rotate")} active={openSlider === "rotate"}>
-          <RotateCw size={18} strokeWidth={1.8} />
+        <TBtn title="Rotate" onClick={() => toggleSlider("rotate")} active={openSlider === "rotate"} btnW={BTN_W} btnH={TOOLBAR_H}>
+          <RotateCw size={ICON_SZ} strokeWidth={1.8} />
         </TBtn>
         {openSlider === "rotate" && (
           <SliderPopover
@@ -215,13 +236,14 @@ export default function FlowerToolbar({ elem }: { elem: FlowerElement }) {
             min={0} max={360} step={1}
             onChange={(v) => updateFlowerLive(elem.id, { rotation: v })}
             format={(v) => `${Math.round(v)}°`}
+            mobile={isMobile}
           />
         )}
       </div>
 
       <div style={{ position: "relative" }}>
-        <TBtn title="Resize" onClick={() => toggleSlider("resize")} active={openSlider === "resize"}>
-          <Maximize2 size={17} strokeWidth={1.8} />
+        <TBtn title="Resize" onClick={() => toggleSlider("resize")} active={openSlider === "resize"} btnW={BTN_W} btnH={TOOLBAR_H}>
+          <Maximize2 size={ICON_SZ} strokeWidth={1.8} />
         </TBtn>
         {openSlider === "resize" && (
           <SliderPopover
@@ -230,14 +252,15 @@ export default function FlowerToolbar({ elem }: { elem: FlowerElement }) {
             min={30} max={200} step={1}
             onChange={(v) => updateFlowerLive(elem.id, { scale: v / 100 })}
             format={(v) => `${v}%`}
+            mobile={isMobile}
           />
         )}
       </div>
 
       <Sep />
 
-      <TBtn title="Remove flower" onClick={() => removeFlower(elem.id)} danger>
-        <Trash2 size={17} strokeWidth={1.8} />
+      <TBtn title="Remove flower" onClick={() => removeFlower(elem.id)} danger btnW={BTN_W} btnH={TOOLBAR_H}>
+        <Trash2 size={ICON_SZ} strokeWidth={1.8} />
       </TBtn>
     </motion.div>
   );

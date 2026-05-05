@@ -281,15 +281,21 @@ export default function CanvasControls() {
     );
   }
 
-  // ── Desktop: horizontal pill below canvas ────────────────────────
+  // ── Desktop: compact pill anchored below the canvas in the workspace ─
   return (
     <>
       <div style={{
+        position: "absolute",
+        bottom: 20,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 10,
         display: "inline-flex", alignItems: "center",
         padding: "0 6px", height: 48, borderRadius: 12,
         backgroundColor: "#F0EAE0",
         boxShadow: "0 2px 8px rgba(61,43,31,0.08)",
         border: "0.5px solid #D8D0C4",
+        whiteSpace: "nowrap",
       }}>
         <HBtn title="Undo" disabled={!canUndo} onClick={undo}>
           <Undo2 size={20} strokeWidth={1.7} />
