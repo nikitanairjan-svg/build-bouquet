@@ -86,6 +86,7 @@ export function buildBouquetShareUrl(
     binary += String.fromCharCode(b);
   });
 
-  const encoded = btoa(binary);
-  return `${window.location.origin}/bouquet?data=${encodeURIComponent(encoded)}`;
+  // base64url: +→- /→_ strip = padding — no percent-encoding needed, survives TinyURL redirects
+  const b64url = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `${window.location.origin}/bouquet?data=${b64url}`;
 }

@@ -115,7 +115,10 @@ function decodeBouquet(search: string): BouquetPayload | null {
     const params = new URLSearchParams(search);
     const raw = params.get("data");
     if (!raw) return null;
-    const binary = atob(decodeURIComponent(raw));
+    // Support base64url (new: -/_/no-padding) and legacy standard base64 (+//)
+    const b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64 + "==".slice(0, (4 - (b64.length % 4)) % 4);
+    const binary = atob(padded);
     const bytes  = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const json    = new TextDecoder().decode(bytes);
