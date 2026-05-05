@@ -71,7 +71,11 @@ export default function Preloader() {
 
   function dismiss() {
     setFading(true);
-    setTimeout(() => setVisible(false), 300);
+    setTimeout(() => {
+      setVisible(false);
+      (window as Window & { __preloaderDone?: boolean }).__preloaderDone = true;
+      window.dispatchEvent(new CustomEvent("preloader:done"));
+    }, 300);
   }
 
   function handleEnded() {

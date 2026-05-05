@@ -20,55 +20,70 @@ function Confetti() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles = Array.from({ length: 110 }, (_, i) => ({
-      x:    Math.random() * canvas.width,
-      y:    -16 - Math.random() * 120,
-      vx:   (Math.random() - 0.5) * 3,
-      vy:   1.8 + Math.random() * 3.2,
-      rot:  Math.random() * Math.PI * 2,
-      vrot: (Math.random() - 0.5) * 0.18,
-      w:    5 + Math.random() * 7,
-      h:    2.5 + Math.random() * 3,
-      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-    }));
-
-    const DURATION = 3200;
-    let start: number | null = null;
     let raf: number;
 
-    const draw = (t: number) => {
-      if (!start) start = t;
-      const elapsed  = t - start;
-      const progress = Math.min(elapsed / DURATION, 1);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const alpha = progress > 0.65 ? 1 - (progress - 0.65) / 0.35 : 1;
-      for (const p of particles) {
-        p.x  += p.vx;
-        p.y  += p.vy;
-        p.vy += 0.06;
-        p.vx += Math.sin(t * 0.0008 + p.y * 0.012) * 0.04;
-        p.rot += p.vrot;
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rot);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-      if (progress < 1) raf = requestAnimationFrame(draw);
+    const startAnimation = () => {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = Array.from({ length: 110 }, (_, i) => ({
+        x:    Math.random() * canvas.width,
+        y:    -16 - Math.random() * 120,
+        vx:   (Math.random() - 0.5) * 3,
+        vy:   1.8 + Math.random() * 3.2,
+        rot:  Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.18,
+        w:    5 + Math.random() * 7,
+        h:    2.5 + Math.random() * 3,
+        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      }));
+
+      const DURATION = 3200;
+      let start: number | null = null;
+
+      const draw = (t: number) => {
+        if (!start) start = t;
+        const elapsed  = t - start;
+        const progress = Math.min(elapsed / DURATION, 1);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const alpha = progress > 0.65 ? 1 - (progress - 0.65) / 0.35 : 1;
+        for (const p of particles) {
+          p.x  += p.vx;
+          p.y  += p.vy;
+          p.vy += 0.06;
+          p.vx += Math.sin(t * 0.0008 + p.y * 0.012) * 0.04;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        if (progress < 1) raf = requestAnimationFrame(draw);
+      };
+
+      raf = requestAnimationFrame(draw);
     };
 
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
+    // Wait for the preloader to finish before firing confetti so it's visible
+    if ((window as Window & { __preloaderDone?: boolean }).__preloaderDone) {
+      startAnimation();
+    } else {
+      window.addEventListener("preloader:done", startAnimation, { once: true });
+    }
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("preloader:done", startAnimation);
+    };
   }, []);
 
   return (
