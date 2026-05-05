@@ -87,7 +87,7 @@ const WRAP_W      = 340;
 const WRAP_H      = 460;
 const FLOWER_SIZE = 88;
 
-const DISPLAY_W_DESKTOP = 410;
+const DISPLAY_W_DESKTOP = 500;
 
 // ── Stamp / perforated-edge mask ──────────────────────────────────
 const STAMP_MASK = [
@@ -277,8 +277,8 @@ export default function BouquetReceiver() {
 
   const mobile = viewportW <= 640;
 
-  // On mobile, shrink the bouquet so it fits alongside logo + text + button
-  const displayW     = mobile ? Math.min(300, viewportW - 50) : DISPLAY_W_DESKTOP;
+  // Bouquet is the hero — use as much width as possible
+  const displayW     = mobile ? Math.min(viewportW - 28, 360) : DISPLAY_W_DESKTOP;
   const displayScale = displayW / CANVAS_W;
   const displayH     = Math.round(CANVAS_H * displayScale);
 
@@ -320,15 +320,15 @@ export default function BouquetReceiver() {
 
         {/* ── Content ── */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-          padding: mobile ? "8px 24px 12px" : "12px 24px 12px", position: "relative", zIndex: 1, width: "100%" }}>
+          padding: mobile ? "8px 24px 20px" : "12px 24px 36px", position: "relative", zIndex: 1, width: "100%" }}>
 
           {/* A. Logo */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }} style={{ marginBottom: mobile ? 2 : 6 }}>
+            transition={{ duration: 0.4 }} style={{ marginBottom: mobile ? 4 : 10 }}>
             <button onClick={() => router.push("/")} aria-label="Go to home"
               style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
               <Image src="/preloader/logo.svg" alt="BloomCraft"
-                width={mobile ? 52 : 80} height={mobile ? 52 : 80}
+                width={mobile ? 40 : 64} height={mobile ? 40 : 64}
                 style={{ objectFit: "contain", display: "block" }} />
             </button>
           </motion.div>
@@ -336,15 +336,17 @@ export default function BouquetReceiver() {
           {/* B. Greeting */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-            style={{ textAlign: "center", marginBottom: mobile ? 4 : 14 }}>
+            style={{ textAlign: "center", marginBottom: mobile ? 6 : 16 }}>
             <h1 style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: mobile ? 22 : 26, fontWeight: 400, color: "#3D2B1F", lineHeight: 1.2, margin: "0 0 3px" }}>
+              fontSize: mobile ? 20 : 26, fontWeight: 400, color: "#3D2B1F", lineHeight: 1.2, margin: "0 0 2px" }}>
               This one&apos;s for you
             </h1>
-            <p style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
-              fontSize: mobile ? 14 : 16, color: "#4A3B30", margin: 0 }}>
-              A digital bouquet, handcrafted with care
-            </p>
+            {!mobile && (
+              <p style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
+                fontSize: 16, color: "#4A3B30", margin: 0 }}>
+                A digital bouquet, handcrafted with care
+              </p>
+            )}
           </motion.div>
 
           {/* C. Bouquet — centered */}
@@ -352,7 +354,7 @@ export default function BouquetReceiver() {
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.9, ease: "easeOut", delay: 0.6 }}
-            style={{ position: "relative", marginBottom: mobile ? 6 : 14 }}
+            style={{ position: "relative", marginBottom: mobile ? 0 : 10 }}
           >
             {/* Elliptical shadow */}
             <div style={{
@@ -440,19 +442,27 @@ export default function BouquetReceiver() {
             </div>
           </motion.div>
 
-          {/* D. CTA */}
+          {/* D. CTA — pushed to bottom of flex column */}
           <motion.div
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 1.5 }}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+              marginTop: "auto", paddingTop: mobile ? 14 : 20 }}>
             <button onClick={() => router.push("/")}
               style={{ display: "inline-flex", alignItems: "center",
-                padding: "10px 28px", borderRadius: 8, border: "none", background: "#963310",
-                fontFamily: "var(--font-cormorant)", fontSize: 14, color: "#FFF8F0",
-                cursor: "pointer", transition: "opacity 150ms",
-                boxShadow: "0 4px 14px rgba(150,51,16,0.28)" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.88")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}>
+                padding: "9px 28px", borderRadius: 8,
+                border: "1.5px solid rgba(150,51,16,0.45)",
+                background: "transparent",
+                fontFamily: "var(--font-cormorant)", fontSize: 14, color: "#963310",
+                cursor: "pointer", transition: "background 150ms, border-color 150ms" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(150,51,16,0.07)";
+                (e.currentTarget as HTMLElement).style.borderColor = "#963310";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(150,51,16,0.45)";
+              }}>
               Create your own bouquet
             </button>
             <p style={{ fontFamily: "var(--font-cormorant)", fontStyle: "italic",
