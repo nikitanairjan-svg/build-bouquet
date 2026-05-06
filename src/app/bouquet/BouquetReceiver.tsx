@@ -462,7 +462,7 @@ export default function BouquetReceiver() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 1.5 }}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-              marginTop: "auto", paddingTop: mobile ? 14 : 20 }}>
+              marginTop: mobile ? 0 : "auto", paddingTop: mobile ? 14 : 20 }}>
             <button onClick={() => router.push("/")}
               style={{ display: "inline-flex", alignItems: "center",
                 padding: "9px 28px", borderRadius: 8,
