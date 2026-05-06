@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost, Petit_Formal_Script } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Preloader from "@/components/shared/Preloader";
 
@@ -45,6 +46,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased" style={{ backgroundColor: "var(--paper)" }}>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-9G9PFWH7DM"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9G9PFWH7DM');
+          `}
+        </Script>
         <Preloader />
         {children}
       </body>
